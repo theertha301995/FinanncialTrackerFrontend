@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signup, clearError } from '../features/auth/authSlice';
 import { RootState, AppDispatch } from '../app/store';
-import { Mail, Lock, User, Users, Eye, EyeOff, UserPlus, Wallet, Hash } from 'lucide-react';
+import { Mail, Lock, User, Users, Eye, EyeOff, UserPlus, Wallet } from 'lucide-react';
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({

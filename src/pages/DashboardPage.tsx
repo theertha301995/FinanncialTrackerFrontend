@@ -3,12 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from '../app/store';
 import {
   LayoutDashboard,
-  TrendingUp,
   TrendingDown,
   Wallet,
   CreditCard,
-  Calendar,
-  AlertCircle,
   DollarSign,
   PieChart,
   ArrowUpRight,

@@ -3,7 +3,7 @@
 // Complete Expense Management Page with Redux Integration
 // ============================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   getExpenses, 
@@ -50,8 +50,6 @@ const ExpensePage: React.FC = () => {
     (state: RootState) => state.expenses
   );
   
-  const { user } = useSelector((state: RootState) => state.auth);
-  
   // Local UI state
   const [viewMode, setViewMode] = useState<'personal' | 'family'>('personal');
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,24 +86,8 @@ const ExpensePage: React.FC = () => {
     }
   }, [dispatch, viewMode]);
 
-  // Calculate stats when data changes
-  useEffect(() => {
-    calculateStats();
-  }, [expenses, familyExpenses, viewMode]);
-
-  // Handle errors
-  useEffect(() => {
-    if (error) {
-      setShowError(true);
-      const timer = setTimeout(() => {
-        setShowError(false);
-        dispatch(clearError());
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, dispatch]);
-
-  const calculateStats = () => {
+  // Calculate stats when data changes - using useCallback to fix dependency warning
+  const calculateStats = useCallback(() => {
     const data = viewMode === 'family' ? familyExpenses : expenses;
     const total = data.reduce((sum: number, exp: any) => sum + exp.amount, 0);
 
@@ -128,7 +110,23 @@ const ExpensePage: React.FC = () => {
     });
 
     setStats({ total, monthTotal, weekTotal, categoryBreakdown });
-  };
+  }, [viewMode, familyExpenses, expenses]);
+
+  useEffect(() => {
+    calculateStats();
+  }, [calculateStats]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+        dispatch(clearError());
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, dispatch]);
 
   const handleAddExpense = async (expenseData: any) => {
     try {
@@ -193,11 +191,6 @@ const ExpensePage: React.FC = () => {
     a.href = url;
     a.download = `expenses-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-  };
-
-  const getCategoryColor = (category: string) => {
-    const cat = categories.find(c => c.value === category);
-    return cat?.color || 'gray';
   };
 
   const getCategoryIcon = (category: string) => {

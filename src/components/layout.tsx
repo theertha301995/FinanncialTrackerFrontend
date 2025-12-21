@@ -302,9 +302,9 @@ const Layout: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center space-x-6 text-sm text-gray-600">
-                <a href="#" className="hover:text-blue-600 transition">Privacy</a>
-                <a href="#" className="hover:text-blue-600 transition">Terms</a>
-                <a href="#" className="hover:text-blue-600 transition">Support</a>
+                <Link to="/privacy" className="hover:text-blue-600 transition">Privacy</Link>
+                <Link to="/terms" className="hover:text-blue-600 transition">Terms</Link>
+                <Link to="/support" className="hover:text-blue-600 transition">Support</Link>
               </div>
             </div>
           </div>
