@@ -19,7 +19,6 @@ import {
   TrendingUp, 
   Calendar, 
   DollarSign, 
-  MessageSquare, 
   Globe, 
   Sparkles,
   ArrowLeft,
