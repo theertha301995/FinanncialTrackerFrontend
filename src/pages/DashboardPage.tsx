@@ -30,11 +30,9 @@ const Dashboard = () => {
   
   const { expenses, isLoading: expensesLoading } = useSelector((state: RootState) => state.expenses);
   const { status: budgetStatus, isLoading: budgetsLoading } = useSelector((state: RootState) => state.budget);
-  const { family, isLoading: familyLoading } = useSelector((state: RootState) => state.family);
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [timeFilter, setTimeFilter] = useState('month');
-  const [totalFamilySpending, setTotalFamilySpending] = useState(0);
 
   useEffect(() => {
     // Fetch all necessary data
@@ -44,11 +42,7 @@ const Dashboard = () => {
     });
     
     if (user?.hasFamily) {
-      dispatch(getFamilyTotalSpending()).then((result: any) => {
-        if (result.payload) {
-          setTotalFamilySpending(result.payload.total || 0);
-        }
-      });
+      dispatch(getFamilyTotalSpending());
     }
   }, [dispatch, user]);
 
@@ -89,11 +83,9 @@ const Dashboard = () => {
   const filteredExpenses = getFilteredExpenses();
 
   // Calculate total spent
-  // Use API's spent value if available, otherwise calculate from expenses
   const totalSpent = budgetStatus?.spent || filteredExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
 
   // Calculate total budget from budgetStatus
-  // API returns: { budget: 25000, period: "monthly", spent: 9186, remaining: 15814, status: "Within limit" }
   const totalBudget = (() => {
     if (!budgetStatus) return 0;
     
@@ -102,7 +94,7 @@ const Dashboard = () => {
       return budgetStatus.reduce((sum: number, b: any) => sum + (b.budget || b.limit || 0), 0);
     }
     
-    // If it's the status object with budget property (your case)
+    // If it's the status object with budget property
     if (budgetStatus.budget) {
       return budgetStatus.budget;
     }

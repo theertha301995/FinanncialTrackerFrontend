@@ -28,32 +28,7 @@ interface ExpenseInput {
   date?: string;
 }
 
-interface ChatResponse {
-  success: boolean;
-  expense?: Expense;
-  message: string;
-  parsedData?: {
-    amount: number;
-    category: string;
-    confidence: number;
-    parser: string;
-    detectedLanguage?: string;
-    translatedInput?: string;
-  };
-  familyTotal?: number;
-  language?: {
-    detected: string;
-    name: string;
-  };
-  context?: any;
-}
-
-interface ApiResponse<T = any> {
-  success?: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
+// Removed unused ChatResponse and ApiResponse interfaces
 
 // Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -150,21 +125,16 @@ export const logExpenseByChat = async (message: string) => {
 
 /**
  * Chat about expenses - ask questions
- * POST /api/chat/query (you need to add this route)
- * OR create endpoint that uses aiChatController.chatAboutExpenses
+ * POST /api/chat/query
  */
 export const chatAboutExpenses = async (message: string) => {
   try {
-    // For now, using the regular expenses endpoint for queries
-    // You should add a dedicated route: router.post('/chat/query', protect, chatAboutExpenses);
     const response = await apiClient.post('/chat/query', { message });
     return response.data;
   } catch (error) {
     throw error;
   }
 };
-
-
 
 // ============================================
 // EXPENSE CRUD ENDPOINTS
@@ -465,8 +435,8 @@ export const getErrorMessage = (error: any): string => {
 // Export the axios instance for advanced usage
 export { apiClient };
 
-// Export all functions as default object
-export default {
+// Named exports object
+const expenseApiExports = {
   // Chat endpoints
   logExpenseByChat,
   chatAboutExpenses,
@@ -493,3 +463,5 @@ export default {
   isAuthError,
   getErrorMessage,
 };
+
+export default expenseApiExports;
