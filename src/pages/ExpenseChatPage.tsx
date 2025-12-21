@@ -54,8 +54,8 @@ const ExpenseChatPage: React.FC = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Redux state
-  const { familyExpenses, isLoading, error, chatResponse } = useSelector(
+  // Redux state - FIXED: Removed unused 'error' variable
+  const { familyExpenses, isLoading, chatResponse } = useSelector(
     (state: RootState) => state.expenses
   );
   
