@@ -80,6 +80,7 @@ function App() {
               <Layout />
             </PrivateRoute>
           }
+          
         >
           <Route index element={<DashboardPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
