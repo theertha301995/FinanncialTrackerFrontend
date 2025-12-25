@@ -102,6 +102,21 @@ export const logExpenseByChat = createAsyncThunk<LogExpenseResponse, string>(
     }
   }
 );
+export const chatQueryThunk = createAsyncThunk<
+  ChatResponse,
+  { message: string; userId: string; familyId: string }
+>(
+  'expenses/chatQuery',
+  async ({ message, userId, familyId }, { rejectWithValue }) => {
+    try {
+      return await expenseAPI.chatQuery(message, userId, familyId);
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || 'Chat query failed'
+      );
+    }
+  }
+);
 
 export const chatAboutExpenses = createAsyncThunk<ChatResponse, string>(
   'expenses/chat',
@@ -291,6 +306,22 @@ const expenseSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload as string;
     });
+// -----------------------------
+// Chat Query (analytics)
+// -----------------------------
+builder.addCase(chatQueryThunk.pending, (state) => {
+  state.isLoading = true;
+});
+
+builder.addCase(chatQueryThunk.fulfilled, (state, action) => {
+  state.isLoading = false;
+  state.chatResponse = action.payload.context; // 👈 backend uses `content`
+});
+
+builder.addCase(chatQueryThunk.rejected, (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload as string;
+});
 
     // -----------------------------
     // Delete Expense

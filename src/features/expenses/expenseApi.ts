@@ -112,7 +112,22 @@ export const logExpenseByChat = async (message: string) => {
     throw error;
   }
 };
-
+export const chatQuery = async (
+  message: string,
+  userId: string,
+  familyId: string
+) => {
+  try {
+    const response = await apiClient.post('/chat/query', {
+      message,
+      userId,
+      familyId,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 /**
  * Chat about expenses - query processing
  * This uses client-side logic since you don't have a query endpoint
@@ -332,6 +347,7 @@ const expenseApiExports = {
   downloadCSV,
   isAuthError,
   getErrorMessage,
+  chatQuery, 
 };
 
 export default expenseApiExports;
