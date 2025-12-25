@@ -22,6 +22,12 @@ export interface Expense {
     email: string;
   };
 }
+export interface ChatRequest 
+{ 
+  message: string; 
+  userId: string; 
+  familyId: string; 
+}
 
 // API response types
 interface AddExpenseResponse {

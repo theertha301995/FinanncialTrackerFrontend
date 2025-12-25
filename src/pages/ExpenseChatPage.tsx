@@ -10,6 +10,7 @@ import {
   logExpenseByChat, 
   chatAboutExpenses,
   getFamilyExpenses,
+  chatQueryThunk,
   clearChatResponse,
   clearError 
 } from '../features/expenses/expenseSlice';
@@ -48,6 +49,7 @@ interface Message {
   language?: any;
   context?: any;
 }
+
 
 const ExpenseChatPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -171,7 +173,31 @@ const ExpenseChatPage: React.FC = () => {
 
         // Refresh family expenses
         dispatch(getFamilyExpenses() as any);
-      } else {
+      } 
+      
+      else if (/category|breakdown|total|summary|today|month/i.test(messageText)) {
+  const result = await dispatch(
+    chatQueryThunk({
+      message: messageText,
+      userId: user._id,      // from your Redux auth state
+      familyId: user.familyId // or however you store familyId
+    }) as any
+  ).unwrap();
+
+  const botMessage: Message = {
+    id: Date.now() + 1,
+    type: 'bot',
+    text: result.message,
+    timestamp: new Date(),
+    context: result.context,
+    language: result.language,
+  };
+
+  setMessages(prev => [...prev, botMessage]);
+}
+
+      
+      else {
         const result = await dispatch(chatAboutExpenses(messageText) as any).unwrap();
         
         // Add bot response
