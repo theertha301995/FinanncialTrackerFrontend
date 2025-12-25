@@ -1,6 +1,6 @@
 // ============================================
 // File: src/api/expenseApi.ts
-// API service layer for expense operations
+// API service layer - Updated to work with existing backend
 // ============================================
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -24,15 +24,12 @@ interface ExpenseInput {
   description: string;
   amount: number;
   category?: string;
-  lang?: string;
   date?: string;
 }
 
-// Removed unused ChatResponse and ApiResponse interfaces
-
 // Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-const REQUEST_TIMEOUT = 30000; // 30 seconds
+const REQUEST_TIMEOUT = 30000;
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -63,19 +60,14 @@ apiClient.interceptors.request.use(
 // Response Interceptor - Handle Errors
 // ============================================
 apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error: AxiosError) => {
-    // Handle specific error cases
     if (error.response) {
-      // Server responded with error status
       const status = error.response.status;
       const data: any = error.response.data;
 
       switch (status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           window.location.href = '/login';
@@ -95,11 +87,9 @@ apiClient.interceptors.response.use(
 
       return Promise.reject(data.message || data.error || 'An error occurred');
     } else if (error.request) {
-      // Request made but no response received
       console.error('Network error:', error.message);
       return Promise.reject('Network error. Please check your connection.');
     } else {
-      // Something happened in setting up the request
       console.error('Request error:', error.message);
       return Promise.reject(error.message);
     }
@@ -107,11 +97,11 @@ apiClient.interceptors.response.use(
 );
 
 // ============================================
-// CHAT API ENDPOINTS
+// AI CHAT API - Uses your backend aiChatRoutes
 // ============================================
 
 /**
- * Log expense via chat with natural language
+ * Log expense via chat - uses backend AI
  * POST /api/chat/expense
  */
 export const logExpenseByChat = async (message: string) => {
@@ -124,26 +114,83 @@ export const logExpenseByChat = async (message: string) => {
 };
 
 /**
- * Chat about expenses - ask questions
- * POST /api/chat/query
+ * Chat about expenses - query processing
+ * This uses client-side logic since you don't have a query endpoint
  */
 export const chatAboutExpenses = async (message: string) => {
   try {
-    const response = await apiClient.post('/chat/query', { message });
-    return response.data;
+    const lowerMsg = message.toLowerCase();
+    const familyExpenses = await getFamilyExpenses();
+    
+    let responseMessage = '';
+    let context: any = {};
+
+    // Today's expenses
+    if (lowerMsg.includes('today')) {
+      const today = new Date();
+      const todayExpenses = familyExpenses.filter((exp: any) => {
+        const expDate = new Date(exp.date);
+        return expDate.toDateString() === today.toDateString();
+      });
+      const total = todayExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+      responseMessage = `Today you've spent ₹${total.toLocaleString()} across ${todayExpenses.length} expenses.`;
+      context.recentExpenses = todayExpenses.slice(0, 5);
+    }
+    // Recent expenses
+    else if (lowerMsg.includes('recent')) {
+      const recent = familyExpenses.slice(0, 10);
+      const total = recent.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+      responseMessage = `Your recent 10 expenses total ₹${total.toLocaleString()}.`;
+      context.recentExpenses = recent;
+    }
+    // Category breakdown
+    else if (lowerMsg.includes('category') || lowerMsg.includes('breakdown')) {
+      const breakdown: { [key: string]: number } = {};
+      familyExpenses.forEach((exp: any) => {
+        breakdown[exp.category] = (breakdown[exp.category] || 0) + exp.amount;
+      });
+      const sorted = Object.entries(breakdown)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5);
+      
+      responseMessage = 'Your top spending categories:\n' + 
+        sorted.map(([cat, amt]) => `• ${cat}: ₹${amt.toLocaleString()}`).join('\n');
+    }
+    // Total spending
+    else if (lowerMsg.includes('total') || lowerMsg.includes('spent')) {
+      const total = familyExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+      responseMessage = `Your total spending is ₹${total.toLocaleString()} across ${familyExpenses.length} expenses.`;
+    }
+    // This month
+    else if (lowerMsg.includes('month')) {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthExpenses = familyExpenses.filter((exp: any) => new Date(exp.date) >= monthStart);
+      const total = monthExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+      responseMessage = `This month you've spent ₹${total.toLocaleString()} across ${monthExpenses.length} expenses.`;
+    }
+    else {
+      responseMessage = "I can help you with:\n• Today's expenses\n• Recent expenses\n• Category breakdown\n• Total spending\n• This month's expenses";
+    }
+
+    return {
+      success: true,
+      message: responseMessage,
+      context,
+      language: {
+        name: 'English',
+        code: 'en',
+      },
+    };
   } catch (error) {
     throw error;
   }
 };
 
 // ============================================
-// EXPENSE CRUD ENDPOINTS
+// EXPENSE CRUD ENDPOINTS (Your existing backend)
 // ============================================
 
-/**
- * Add a new expense
- * POST /api/expenses
- */
 export const addExpense = async (expenseData: ExpenseInput): Promise<any> => {
   try {
     const response = await apiClient.post('/expenses', expenseData);
@@ -153,10 +200,6 @@ export const addExpense = async (expenseData: ExpenseInput): Promise<any> => {
   }
 };
 
-/**
- * Get all expenses for logged-in user
- * GET /api/expenses
- */
 export const getExpenses = async (): Promise<Expense[]> => {
   try {
     const response = await apiClient.get<Expense[]>('/expenses');
@@ -166,10 +209,6 @@ export const getExpenses = async (): Promise<Expense[]> => {
   }
 };
 
-/**
- * Get all family expenses
- * GET /api/expenses/family
- */
 export const getFamilyExpenses = async (): Promise<Expense[]> => {
   try {
     const response = await apiClient.get<Expense[]>('/expenses/family');
@@ -179,10 +218,6 @@ export const getFamilyExpenses = async (): Promise<Expense[]> => {
   }
 };
 
-/**
- * Update an expense
- * PUT /api/expenses/:id
- */
 export const updateExpense = async (id: string, data: Partial<ExpenseInput>): Promise<Expense> => {
   try {
     const response = await apiClient.put<Expense>(`/expenses/${id}`, data);
@@ -192,10 +227,6 @@ export const updateExpense = async (id: string, data: Partial<ExpenseInput>): Pr
   }
 };
 
-/**
- * Delete an expense
- * DELETE /api/expenses/:id
- */
 export const deleteExpense = async (id: string): Promise<{ message: string }> => {
   try {
     const response = await apiClient.delete<{ message: string }>(`/expenses/${id}`);
@@ -209,14 +240,9 @@ export const deleteExpense = async (id: string): Promise<{ message: string }> =>
 // UTILITY FUNCTIONS
 // ============================================
 
-/**
- * Get expense statistics
- */
 export const getExpenseStats = async (viewMode: 'personal' | 'family' = 'personal') => {
   try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
+    const expenses = viewMode === 'family' ? await getFamilyExpenses() : await getExpenses();
 
     const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
     
@@ -251,69 +277,6 @@ export const getExpenseStats = async (viewMode: 'personal' | 'family' = 'persona
   }
 };
 
-/**
- * Get expenses by date range
- */
-export const getExpensesByDateRange = async (
-  startDate: Date, 
-  endDate: Date,
-  viewMode: 'personal' | 'family' = 'personal'
-): Promise<Expense[]> => {
-  try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
-
-    return expenses.filter(exp => {
-      const expenseDate = new Date(exp.date);
-      return expenseDate >= startDate && expenseDate <= endDate;
-    });
-  } catch (error) {
-    throw error;
-  }
-};
-
-/**
- * Get expenses by category
- */
-export const getExpensesByCategory = async (
-  category: string,
-  viewMode: 'personal' | 'family' = 'personal'
-): Promise<Expense[]> => {
-  try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
-
-    return expenses.filter(exp => exp.category === category);
-  } catch (error) {
-    throw error;
-  }
-};
-
-/**
- * Search expenses by description
- */
-export const searchExpenses = async (
-  searchTerm: string,
-  viewMode: 'personal' | 'family' = 'personal'
-): Promise<Expense[]> => {
-  try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
-
-    return expenses.filter(exp => 
-      exp.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  } catch (error) {
-    throw error;
-  }
-};
-
-/**
- * Export expenses to CSV
- */
 export const exportExpensesToCSV = (expenses: Expense[]): string => {
   const headers = ['Date', 'Description', 'Amount', 'Category', 'User'];
   const rows = expenses.map(exp => [
@@ -324,17 +287,9 @@ export const exportExpensesToCSV = (expenses: Expense[]): string => {
     exp.user?.name || 'Unknown'
   ]);
 
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.join(','))
-  ].join('\n');
-
-  return csvContent;
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
 };
 
-/**
- * Download CSV file
- */
 export const downloadCSV = (expenses: Expense[], filename?: string) => {
   const csv = exportExpensesToCSV(expenses);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -350,116 +305,31 @@ export const downloadCSV = (expenses: Expense[], filename?: string) => {
   document.body.removeChild(link);
 };
 
-/**
- * Batch delete expenses
- */
-export const batchDeleteExpenses = async (ids: string[]): Promise<void> => {
-  try {
-    await Promise.all(ids.map(id => deleteExpense(id)));
-  } catch (error) {
-    throw error;
-  }
-};
-
-/**
- * Get today's expenses
- */
-export const getTodayExpenses = async (viewMode: 'personal' | 'family' = 'personal'): Promise<Expense[]> => {
-  try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
-
-    const today = new Date();
-    return expenses.filter(exp => {
-      const expDate = new Date(exp.date);
-      return expDate.toDateString() === today.toDateString();
-    });
-  } catch (error) {
-    throw error;
-  }
-};
-
-/**
- * Get this month's expenses
- */
-export const getThisMonthExpenses = async (viewMode: 'personal' | 'family' = 'personal'): Promise<Expense[]> => {
-  try {
-    const expenses = viewMode === 'family' 
-      ? await getFamilyExpenses() 
-      : await getExpenses();
-
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    return expenses.filter(exp => new Date(exp.date) >= monthStart);
-  } catch (error) {
-    throw error;
-  }
-};
-
-// ============================================
-// ERROR HANDLING HELPER
-// ============================================
-
-/**
- * Check if error is authentication error
- */
 export const isAuthError = (error: any): boolean => {
   return error?.response?.status === 401;
 };
 
-/**
- * Get user-friendly error message
- */
 export const getErrorMessage = (error: any): string => {
-  if (typeof error === 'string') {
-    return error;
-  }
-  
-  if (error?.response?.data?.message) {
-    return error.response.data.message;
-  }
-  
-  if (error?.response?.data?.error) {
-    return error.response.data.error;
-  }
-  
-  if (error?.message) {
-    return error.message;
-  }
-  
+  if (typeof error === 'string') return error;
+  if (error?.response?.data?.message) return error.response.data.message;
+  if (error?.response?.data?.error) return error.response.data.error;
+  if (error?.message) return error.message;
   return 'An unexpected error occurred';
 };
 
-// Export the axios instance for advanced usage
 export { apiClient };
 
-// Named exports object
 const expenseApiExports = {
-  // Chat endpoints
   logExpenseByChat,
   chatAboutExpenses,
-  
-  // CRUD endpoints
   addExpense,
   getExpenses,
   getFamilyExpenses,
   updateExpense,
   deleteExpense,
-  
-  // Utility functions
   getExpenseStats,
-  getExpensesByDateRange,
-  getExpensesByCategory,
-  searchExpenses,
   exportExpensesToCSV,
   downloadCSV,
-  batchDeleteExpenses,
-  getTodayExpenses,
-  getThisMonthExpenses,
-  
-  // Error helpers
   isAuthError,
   getErrorMessage,
 };

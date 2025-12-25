@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
+import { useNavigate } from 'react-router-dom';
+
 import { 
   getFamily, 
   createFamily, 
@@ -27,6 +29,7 @@ const Family: React.FC = () => {
   const [totalSpending, setTotalSpending] = useState<number | null>(null);
   const [loadingInviteCode, setLoadingInviteCode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.hasFamily) {
@@ -47,6 +50,7 @@ const Family: React.FC = () => {
       setFamilyName('');
       dispatch(getMe());
       dispatch(getFamily());
+      navigate('/');
     }
   };
 
@@ -58,6 +62,7 @@ const Family: React.FC = () => {
       setInviteCode('');
       dispatch(getMe());
       dispatch(getFamily());
+      navigate('/'); // or '/dashboard-1'
     }
   };
 

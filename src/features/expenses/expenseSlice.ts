@@ -1,10 +1,10 @@
 // ============================================
-// File: src/store/slices/expenseSlice.ts
-// Fully typed + fixed version
+// File: src/features/expenses/expenseSlice.ts
+// Redux slice with FIXED types and import path
 // ============================================
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as expenseAPI from './expenseApi';
+import * as expenseAPI from '../../features/expenses/expenseApi';
 
 // -----------------------------
 // Types
@@ -35,14 +35,20 @@ interface LogExpenseResponse {
   message?: string;
   parsedData?: any;
   familyTotal?: number;
-  language?: string;
+  language?: {
+    name: string;
+    code: string;
+  };
 }
 
 interface ChatResponse {
   success: boolean;
   message: string;
   context?: any;
-  language?: string;
+  language?: {
+    name: string;
+    code: string;
+  };
 }
 
 interface ExpenseState {
@@ -179,7 +185,7 @@ const expenseSlice = createSlice({
 
     builder.addCase(addExpense.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.expenses.unshift(action.payload.expense); // fully typed
+      state.expenses.unshift(action.payload.expense);
     });
 
     builder.addCase(addExpense.rejected, (state, action) => {
@@ -190,6 +196,10 @@ const expenseSlice = createSlice({
     // -----------------------------
     // Log Expense by Chat
     // -----------------------------
+    builder.addCase(logExpenseByChat.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(logExpenseByChat.fulfilled, (state, action) => {
       state.isLoading = false;
 
@@ -209,6 +219,10 @@ const expenseSlice = createSlice({
     // -----------------------------
     // Chat About Expenses
     // -----------------------------
+    builder.addCase(chatAboutExpenses.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(chatAboutExpenses.fulfilled, (state, action) => {
       state.isLoading = false;
       state.chatResponse = action.payload.message;
@@ -222,6 +236,10 @@ const expenseSlice = createSlice({
     // -----------------------------
     // Get Expenses
     // -----------------------------
+    builder.addCase(getExpenses.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(getExpenses.fulfilled, (state, action) => {
       state.isLoading = false;
       state.expenses = action.payload;
@@ -235,15 +253,29 @@ const expenseSlice = createSlice({
     // -----------------------------
     // Get Family Expenses
     // -----------------------------
+    builder.addCase(getFamilyExpenses.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(getFamilyExpenses.fulfilled, (state, action) => {
       state.isLoading = false;
       state.familyExpenses = action.payload;
     });
 
+    builder.addCase(getFamilyExpenses.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
     // -----------------------------
     // Update Expense
     // -----------------------------
+    builder.addCase(updateExpense.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(updateExpense.fulfilled, (state, action) => {
+      state.isLoading = false;
       const updated = action.payload;
 
       // update in main list
@@ -255,12 +287,27 @@ const expenseSlice = createSlice({
       if (fIdx !== -1) state.familyExpenses[fIdx] = updated;
     });
 
+    builder.addCase(updateExpense.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
     // -----------------------------
     // Delete Expense
     // -----------------------------
+    builder.addCase(deleteExpense.pending, (state) => {
+      state.isLoading = true;
+    });
+
     builder.addCase(deleteExpense.fulfilled, (state, action) => {
+      state.isLoading = false;
       state.expenses = state.expenses.filter((e) => e._id !== action.payload);
       state.familyExpenses = state.familyExpenses.filter((e) => e._id !== action.payload);
+    });
+
+    builder.addCase(deleteExpense.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
     });
   },
 });
