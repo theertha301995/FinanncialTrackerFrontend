@@ -1,13 +1,9 @@
-const CACHE_NAME = 'my-app-cache-v1';
+const CACHE_NAME = 'expense-tracker-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/js/bundle.js',
-  '/static/js/main.chunk.js',
   '/manifest.json',
-  '/favicon.ico',
-  '/logo192.png',
-  '/logo512.png'
+  '/favicon.ico'
 ];
 
 // Install - cache resources
@@ -16,32 +12,39 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((err) => {
-        console.log('Cache failed:', err);
+        // Use addAll with error handling
+        return Promise.all(
+          urlsToCache.map((url) => {
+            return cache.add(url).catch((err) => {
+              console.log('Failed to cache:', url, err);
+            });
+          })
+        );
       })
   );
   self.skipWaiting();
 });
 
-// Fetch - serve from cache, fallback to network
+// Fetch - network first, then cache fallback
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        if (response) {
+        // Check if valid response
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-          return response;
+        // Clone and cache
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request).then((response) => {
+          return response || caches.match('/index.html');
         });
       })
   );
