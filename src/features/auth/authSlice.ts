@@ -15,6 +15,8 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  resetEmailSent: boolean; // NEW
+  resetSuccess: boolean; // NEW
 }
 
 const initialState: AuthState = {
@@ -23,6 +25,8 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem('token'),
+   resetEmailSent: false,
+  resetSuccess: false,
 };
 
 // Async thunks
@@ -37,7 +41,29 @@ export const signup = createAsyncThunk(
     }
   }
 );
-
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.forgotPassword(email);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to send reset email');
+    }
+  }
+);
+// NEW: Reset Password Thunk
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.resetPassword(token, password);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to reset password');
+    }
+  }
+);
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
@@ -74,6 +100,11 @@ const authSlice = createSlice({
       localStorage.removeItem('user');
     },
     clearError: (state) => {
+      state.error = null;
+    },
+     clearResetState: (state) => {
+      state.resetEmailSent = false;
+      state.resetSuccess = false;
       state.error = null;
     },
   },
@@ -115,7 +146,41 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       });
-
+ // NEW: Forgot Password
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.resetEmailSent = false;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.resetEmailSent = true;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+      // NEW: Reset Password
+    builder
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.resetSuccess = false;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.resetSuccess = true;
+        state.user = action.payload;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
     // Get Me
     builder
       .addCase(getMe.pending, (state) => {

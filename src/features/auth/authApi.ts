@@ -20,3 +20,13 @@ export const getMe = async () => {
   const response = await api.get('/auth/me');
   return response.data;
 };
+export const forgotPassword = async (email: string) => {
+  const response = await api.post('/auth/forgot-password', { email });
+  return response.data;
+};
+
+// NEW: Reset Password API
+export const resetPassword = async (token: string, password: string) => {
+  const response = await api.post(`/auth/reset-password/${token}`, { password });
+  return response.data;
+};

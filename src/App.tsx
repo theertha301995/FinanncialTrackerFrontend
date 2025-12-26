@@ -13,6 +13,8 @@ import BudgetPage from './pages/BudgetPage';
 import FamilyPage from './pages/FamilyPage';
 import NotificationsPage from './pages/NotificationPage';
 import ExpenseChatPage from './pages/ExpenseChatPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 // Layout
 import Layout from './components/layout';
 
@@ -88,6 +90,8 @@ function App() {
           <Route path="family" element={<FamilyPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="chat" element ={<ExpenseChatPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         </Route>
 
         {/* Catch all - redirect to login or dashboard */}
