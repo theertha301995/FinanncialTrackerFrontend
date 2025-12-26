@@ -1,6 +1,6 @@
 // ============================================
 // File: src/pages/ExpenseChatPage.tsx
-// Multilingual Chat Interface for Expense Logging
+// Updated to use /api/chat/query for category breakdown
 // ============================================
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -50,20 +50,17 @@ interface Message {
   context?: any;
 }
 
-
 const ExpenseChatPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Redux state - FIXED: Removed unused 'error' variable
   const { familyExpenses, isLoading, chatResponse } = useSelector(
     (state: RootState) => state.expenses
   );
   
   const { user } = useSelector((state: RootState) => state.auth);
   
-  // Local state
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [stats, setStats] = useState({
@@ -74,10 +71,8 @@ const ExpenseChatPage: React.FC = () => {
   const [detectedLanguage, setDetectedLanguage] = useState('English');
 
   useEffect(() => {
-    // Fetch initial stats
     dispatch(getFamilyExpenses() as any);
     
-    // Add welcome message
     setMessages([{
       id: Date.now(),
       type: 'bot',
@@ -92,7 +87,6 @@ const ExpenseChatPage: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Calculate stats from Redux state
     if (familyExpenses.length > 0) {
       const total = familyExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
       const today = new Date();
@@ -107,7 +101,6 @@ const ExpenseChatPage: React.FC = () => {
   }, [familyExpenses]);
 
   useEffect(() => {
-    // Handle chat response from Redux
     if (chatResponse) {
       const botMessage: Message = {
         id: Date.now(),
@@ -139,13 +132,16 @@ const ExpenseChatPage: React.FC = () => {
     setInputText('');
 
     try {
-      // Determine if it's an expense or query
+      // Check if it's an expense logging request
       const isExpense = /\d+|spend|spent|paid|bought|purchase|₹/i.test(messageText);
       
-      if (isExpense) {
+      // Check if it's a query/analytics request
+      const isQuery = /category|breakdown|total|summary|today|month|recent|spending|show/i.test(messageText);
+      
+      if (isExpense && !isQuery) {
+        // Log expense using /api/chat/expense
         const result = await dispatch(logExpenseByChat(messageText) as any).unwrap();
         
-        // Add bot response
         const botMessage: Message = {
           id: Date.now() + 1,
           type: 'bot',
@@ -157,7 +153,6 @@ const ExpenseChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, botMessage]);
 
-        // Update stats
         if (result.familyTotal !== undefined) {
           setStats(prev => ({
             total: result.familyTotal,
@@ -166,41 +161,95 @@ const ExpenseChatPage: React.FC = () => {
           }));
         }
 
-        // Update detected language
         if (result.language?.name) {
           setDetectedLanguage(result.language.name);
         }
 
-        // Refresh family expenses
         dispatch(getFamilyExpenses() as any);
       } 
-      
-      else if (/category|breakdown|total|summary|today|month/i.test(messageText)) {
-  const result = await dispatch(
-    chatQueryThunk({
-      message: messageText,
-      userId: user._id,      // from your Redux auth state
-      familyId: user.familyId // or however you store familyId
-    }) as any
-  ).unwrap();
+      else if (isQuery) {
+        // Check if it's specifically a category/breakdown query
+        const isCategoryQuery = /category|breakdown/i.test(messageText);
+        
+        if (isCategoryQuery) {
+          // Use /api/chat/query for category breakdown
+          
+          // Try to get familyId from multiple sources
+          let familyId = user?.familyId || user?.family?._id || user?.family;
+          
+          // If still no familyId, try to extract from familyExpenses
+          if (!familyId && familyExpenses.length > 0) {
+            familyId = familyExpenses[0]?.family;
+            console.log('Extracted familyId from expenses:', familyId);
+          }
+          
+          if (!user?._id) {
+            const errorMessage: Message = {
+              id: Date.now() + 1,
+              type: 'error',
+              text: 'User ID is missing. Please log in again.',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, errorMessage]);
+            return;
+          }
+          
+          if (!familyId) {
+            const errorMessage: Message = {
+              id: Date.now() + 1,
+              type: 'error',
+              text: 'Family ID is missing. Please make sure you have at least one expense logged.',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, errorMessage]);
+            return;
+          }
+          
+          const result = await dispatch(
+            chatQueryThunk({
+              message: messageText,
+              userId: user._id,
+              familyId: familyId
+            }) as any
+          ).unwrap();
 
-  const botMessage: Message = {
-    id: Date.now() + 1,
-    type: 'bot',
-    text: result.message,
-    timestamp: new Date(),
-    context: result.context,
-    language: result.language,
-  };
+          const botMessage: Message = {
+            id: Date.now() + 1,
+            type: 'bot',
+            text: result.message || result.content,
+            timestamp: new Date(),
+            context: result.context,
+            language: result.language,
+          };
 
-  setMessages(prev => [...prev, botMessage]);
-}
+          setMessages(prev => [...prev, botMessage]);
 
-      
+          if (result.language?.name) {
+            setDetectedLanguage(result.language.name);
+          }
+        } else {
+          // Use chatAboutExpenses for other queries
+          const result = await dispatch(chatAboutExpenses(messageText) as any).unwrap();
+          
+          const botMessage: Message = {
+            id: Date.now() + 1,
+            type: 'bot',
+            text: result.message,
+            timestamp: new Date(),
+            context: result.context,
+            language: result.language,
+          };
+          setMessages(prev => [...prev, botMessage]);
+
+          if (result.language?.name) {
+            setDetectedLanguage(result.language.name);
+          }
+        }
+      }
       else {
+        // Fallback for unclear queries
         const result = await dispatch(chatAboutExpenses(messageText) as any).unwrap();
         
-        // Add bot response
         const botMessage: Message = {
           id: Date.now() + 1,
           type: 'bot',
@@ -211,7 +260,6 @@ const ExpenseChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, botMessage]);
 
-        // Update detected language
         if (result.language?.name) {
           setDetectedLanguage(result.language.name);
         }
