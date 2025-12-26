@@ -1,6 +1,6 @@
 {
-  "short_name": "Finance Tracker",
-  "name": "FamilyExpenseTracker",
+  "short_name": "Finance Manager",
+  "name": "Family Expense Manager",
   "icons": [
     {
       "src": "favicon.ico",
@@ -24,6 +24,6 @@
   "theme_color": "#000000",
   "background_color": "#ffffff",
   "scope": "/",
-  "id": "fet",
-  "description": "Family Expense Tracker is a smart, multilingual expense-tracking app that helps individuals and families manage their daily spending effortlessly. Simply chat with the app in your natural language to log expenses, view spending summaries, and stay in control of your finances.\n\nDesigned for modern users, Family Expense Tracker works seamlessly across devices as a Progressive Web App (PWA), offering fast performance, offline support, and a smooth app-like experience—without requiring large downloads."
+  "id": "fem",
+  "description": "Family Expense Manager is a smart, multilingual expense-tracking app that helps individuals and families manage their daily spending effortlessly. Simply chat with the app in your natural language to log expenses, view spending summaries, and stay in control of your finances.\n\nDesigned for modern users, Family Expense Manager works seamlessly across devices as a Progressive Web App (PWA), offering fast performance, offline support, and a smooth app-like experience—without requiring large downloads."
 }
