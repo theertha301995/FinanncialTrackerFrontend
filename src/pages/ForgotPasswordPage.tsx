@@ -124,6 +124,7 @@ const ForgotPasswordPage: React.FC = () => {
                 className="text-purple-600 hover:text-purple-700 font-semibold"
               >
                 Send another email
+                
               </button>
             </div>
           )}
