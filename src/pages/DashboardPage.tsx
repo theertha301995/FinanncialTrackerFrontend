@@ -321,40 +321,40 @@ const Dashboard = () => {
 
   if (expensesLoading || budgetsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 text-lg">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-base sm:text-lg">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-4 md:p-6 pb-20 sm:pb-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-2xl shadow-lg">
-                <LayoutDashboard className="w-8 h-8 text-white" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg">
+                <LayoutDashboard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Dashboard</h1>
-                <p className="text-gray-600 text-sm md:text-base">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">Dashboard</h1>
+                <p className="text-gray-600 text-xs sm:text-sm md:text-base truncate">
                   Welcome back, {user?.name}! Here's your financial overview
                 </p>
               </div>
             </div>
             
             {/* Time Filter */}
-            <div className="flex gap-2 bg-white rounded-xl p-1 shadow-md">
+            <div className="flex gap-2 bg-white rounded-xl p-1 shadow-md w-full sm:w-auto">
               {['week', 'month', 'year'].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setTimeFilter(filter)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition capitalize ${
+                  className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition capitalize ${
                     timeFilter === filter
                       ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
                       : 'text-gray-600 hover:bg-gray-100'
@@ -368,51 +368,51 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`${stat.bgColor} p-3 rounded-xl`}>
-                  <stat.icon className={`w-6 h-6 ${stat.textColor}`} />
+            <div key={index} className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <div className={`${stat.bgColor} p-2 sm:p-3 rounded-lg sm:rounded-xl`}>
+                  <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${stat.textColor}`} />
                 </div>
-                <div className={`flex items-center gap-1 text-sm font-semibold ${
+                <div className={`flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm font-semibold ${
                   stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
                 }`}>
                   {stat.trend === 'up' ? (
-                    <ArrowUpRight className="w-4 h-4" />
+                    <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
                   ) : (
-                    <ArrowDownRight className="w-4 h-4" />
+                    <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
                   {stat.change}
                 </div>
               </div>
-              <p className="text-gray-600 text-sm mb-1">{stat.title}</p>
-              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+              <p className="text-gray-600 text-xs sm:text-sm mb-0.5 sm:mb-1 truncate">{stat.title}</p>
+              <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 break-all">{stat.value}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Budget Progress */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Target className="w-6 h-6 text-indigo-600" />
+          <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
                 Budget Progress
               </h2>
-              <span className="text-sm text-gray-500 capitalize">{timeFilter}ly</span>
+              <span className="text-xs sm:text-sm text-gray-500 capitalize">{timeFilter}ly</span>
             </div>
 
             {totalBudget > 0 ? (
               <>
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600 font-medium">₹{totalSpent.toLocaleString()} spent</span>
-                    <span className="text-2xl font-bold text-gray-900">{calculateBudgetPercentage().toFixed(1)}%</span>
+                    <span className="text-sm sm:text-base text-gray-600 font-medium">₹{totalSpent.toLocaleString()} spent</span>
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900">{calculateBudgetPercentage().toFixed(1)}%</span>
                   </div>
-                  <div className="relative w-full bg-gray-200 rounded-full h-8 overflow-hidden shadow-inner">
+                  <div className="relative w-full bg-gray-200 rounded-full h-6 sm:h-8 overflow-hidden shadow-inner">
                     <div
-                      className={`h-full transition-all duration-700 ease-out rounded-full flex items-center justify-end pr-3 ${
+                      className={`h-full transition-all duration-700 ease-out rounded-full flex items-center justify-end pr-2 sm:pr-3 ${
                         calculateBudgetPercentage() >= 100
                           ? 'bg-gradient-to-r from-red-500 to-red-600'
                           : calculateBudgetPercentage() >= 80
@@ -422,68 +422,68 @@ const Dashboard = () => {
                       style={{ width: `${Math.min(calculateBudgetPercentage(), 100)}%` }}
                     >
                       {calculateBudgetPercentage() > 15 && (
-                        <span className="text-white text-sm font-bold">
+                        <span className="text-white text-xs sm:text-sm font-bold">
                           {calculateBudgetPercentage().toFixed(0)}%
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-between mt-2 text-sm text-gray-500">
+                  <div className="flex justify-between mt-2 text-xs sm:text-sm text-gray-500">
                     <span>₹0</span>
                     <span>₹{totalBudget.toLocaleString()}</span>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Target className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No budget set yet. Create a budget to track your spending!</p>
+              <div className="text-center py-6 sm:py-8 text-gray-500">
+                <Target className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm sm:text-base">No budget set yet. Create a budget to track your spending!</p>
               </div>
             )}
 
             {/* Monthly Spending Chart */}
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">Monthly Spending Trend</h3>
+            <div className="mt-4 sm:mt-6">
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-3 sm:mb-4">Monthly Spending Trend</h3>
               {maxAmount > 1 ? (
-                <div className="flex items-end justify-between gap-2 h-40">
+                <div className="flex items-end justify-between gap-1 sm:gap-2 h-32 sm:h-40">
                   {monthlyComparison.map((data, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                    <div key={index} className="flex-1 flex flex-col items-center gap-1 sm:gap-2">
                       <div className="w-full bg-gray-100 rounded-t-lg relative group cursor-pointer hover:bg-gray-200 transition">
                         <div
                           className="bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg transition-all duration-500 relative"
-                          style={{ height: `${(data.amount / maxAmount) * 140}px` }}
+                          style={{ height: `${(data.amount / maxAmount) * 140}px`, maxHeight: '140px' }}
                         >
-                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                          <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
                             ₹{data.amount.toLocaleString()}
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs text-gray-600 font-medium">{data.month}</span>
+                      <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{data.month}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No spending data available yet</p>
+                <div className="text-center py-6 sm:py-8 text-gray-500">
+                  <Activity className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No spending data available yet</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Category Breakdown */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <PieChart className="w-6 h-6 text-indigo-600" />
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <PieChart className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
               By Category
             </h2>
             {categoryBreakdown.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {categoryBreakdown.slice(0, 6).map((cat, index) => (
                   <div key={index}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">{cat.category}</span>
-                      <span className="text-sm font-bold text-gray-900">₹{cat.amount.toLocaleString()}</span>
+                    <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">{cat.category}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap">₹{cat.amount.toLocaleString()}</span>
                     </div>
                     <div className="relative w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div
@@ -491,34 +491,34 @@ const Dashboard = () => {
                         style={{ width: `${cat.percentage}%` }}
                       ></div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">{cat.percentage.toFixed(1)}%</div>
+                    <div className="text-[10px] sm:text-xs text-gray-500 mt-1">{cat.percentage.toFixed(1)}%</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <PieChart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No expenses to categorize yet</p>
+              <div className="text-center py-6 sm:py-8 text-gray-500">
+                <PieChart className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No expenses to categorize yet</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <Activity className="w-6 h-6 text-indigo-600" />
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
               Recent Transactions
             </h2>
-            <button className="text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-1">
+            <button className="text-indigo-600 hover:text-indigo-700 text-xs sm:text-sm font-semibold flex items-center gap-1">
               View All
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </button>
           </div>
 
           {recentExpenses.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentExpenses.map((expense: any) => {
                 const Icon = getCategoryIcon(expense.category);
                 const iconColor = getCategoryIconColor(expense.category);
@@ -526,66 +526,66 @@ const Dashboard = () => {
                 return (
                   <div
                     key={expense._id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition cursor-pointer border border-gray-200"
+                    className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-gray-100 transition cursor-pointer border border-gray-200"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`${iconColor} p-3 rounded-xl`}>
-                        <Icon className="w-5 h-5" />
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                      <div className={`${iconColor} p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-800">{expense.description}</p>
-                        <p className="text-sm text-gray-500">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{expense.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 truncate">
                           {expense.category} • {new Date(expense.date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">₹{expense.amount.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">Expense</p>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <p className="text-base sm:text-lg font-bold text-gray-900 whitespace-nowrap">₹{expense.amount.toLocaleString()}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500">Expense</p>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Activity className="w-16 h-16 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">No transactions yet</p>
-              <p className="text-sm">Start adding expenses to see them here</p>
+            <div className="text-center py-8 sm:py-12 text-gray-500">
+              <Activity className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 opacity-50" />
+              <p className="text-base sm:text-lg font-medium">No transactions yet</p>
+              <p className="text-xs sm:text-sm">Start adding expenses to see them here</p>
             </div>
           )}
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <button 
             onClick={() => window.location.href = '/expenses'}
-            className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"
+            className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-2 sm:gap-3 group"
           >
-            <div className="bg-white bg-opacity-20 p-3 rounded-xl group-hover:scale-110 transition">
-              <TrendingDown className="w-6 h-6" />
+            <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg sm:rounded-xl group-hover:scale-110 transition">
+              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-semibold">Add Expense</span>
+            <span className="font-semibold text-sm sm:text-base">Add Expense</span>
           </button>
           
           <button 
             onClick={() => window.location.href = '/family'}
-            className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"
+            className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-2 sm:gap-3 group"
           >
-            <div className="bg-white bg-opacity-20 p-3 rounded-xl group-hover:scale-110 transition">
-              <Users className="w-6 h-6" />
+            <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg sm:rounded-xl group-hover:scale-110 transition">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-semibold">View Family</span>
+            <span className="font-semibold text-sm sm:text-base">View Family</span>
           </button>
           
           <button 
             onClick={() => window.location.href = '/budget'}
-            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-3 group"
+            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition flex flex-col items-center gap-2 sm:gap-3 group"
           >
-            <div className="bg-white bg-opacity-20 p-3 rounded-xl group-hover:scale-110 transition">
-              <Target className="w-6 h-6" />
+            <div className="bg-white bg-opacity-20 p-2 sm:p-3 rounded-lg sm:rounded-xl group-hover:scale-110 transition">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-semibold">Set Budget</span>
+            <span className="font-semibold text-sm sm:text-base">Set Budget</span>
           </button>
           
           <button 

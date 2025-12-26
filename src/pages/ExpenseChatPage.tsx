@@ -1,6 +1,6 @@
 // ============================================
 // File: src/pages/ExpenseChatPage.tsx
-// Updated to use /api/chat/query for category breakdown
+// Mobile Responsive Version
 // ============================================
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -132,14 +132,10 @@ const ExpenseChatPage: React.FC = () => {
     setInputText('');
 
     try {
-      // Check if it's an expense logging request
       const isExpense = /\d+|spend|spent|paid|bought|purchase|₹/i.test(messageText);
-      
-      // Check if it's a query/analytics request
       const isQuery = /category|breakdown|total|summary|today|month|recent|spending|show/i.test(messageText);
       
       if (isExpense && !isQuery) {
-        // Log expense using /api/chat/expense
         const result = await dispatch(logExpenseByChat(messageText) as any).unwrap();
         
         const botMessage: Message = {
@@ -168,16 +164,11 @@ const ExpenseChatPage: React.FC = () => {
         dispatch(getFamilyExpenses() as any);
       } 
       else if (isQuery) {
-        // Check if it's specifically a category/breakdown query
         const isCategoryQuery = /category|breakdown/i.test(messageText);
         
         if (isCategoryQuery) {
-          // Use /api/chat/query for category breakdown
-          
-          // Try to get familyId from multiple sources
           let familyId = user?.familyId || user?.family?._id || user?.family;
           
-          // If still no familyId, try to extract from familyExpenses
           if (!familyId && familyExpenses.length > 0) {
             familyId = familyExpenses[0]?.family;
             console.log('Extracted familyId from expenses:', familyId);
@@ -228,7 +219,6 @@ const ExpenseChatPage: React.FC = () => {
             setDetectedLanguage(result.language.name);
           }
         } else {
-          // Use chatAboutExpenses for other queries
           const result = await dispatch(chatAboutExpenses(messageText) as any).unwrap();
           
           const botMessage: Message = {
@@ -247,7 +237,6 @@ const ExpenseChatPage: React.FC = () => {
         }
       }
       else {
-        // Fallback for unclear queries
         const result = await dispatch(chatAboutExpenses(messageText) as any).unwrap();
         
         const botMessage: Message = {
@@ -293,90 +282,90 @@ const ExpenseChatPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-6xl mx-auto p-4 h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-white rounded-t-2xl shadow-lg p-6 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+      <div className="max-w-6xl mx-auto p-2 sm:p-4 h-screen flex flex-col">
+        {/* Header - Mobile Responsive */}
+        <div className="bg-white rounded-t-xl sm:rounded-t-2xl shadow-lg p-3 sm:p-4 md:p-6 border-b">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/expenses')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                 title="Back to expense list"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
               </button>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  AI Expense Chat
-                  <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-1 rounded-full">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 flex flex-wrap items-center gap-1 sm:gap-2">
+                  <span className="whitespace-nowrap">AI Expense Chat</span>
+                  <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
                     Multilingual
                   </span>
                 </h1>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <Globe className="w-3 h-3" />
-                  {user?.name} • {detectedLanguage}
+                <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1 truncate">
+                  <Globe className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{user?.name}</span> • <span>{detectedLanguage}</span>
                 </p>
               </div>
             </div>
             <button
               onClick={() => navigate('/expenses')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm w-full sm:w-auto"
             >
-              <List className="w-4 h-4" />
-              <span className="text-sm font-medium">View List</span>
+              <List className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="font-medium">View List</span>
             </button>
           </div>
 
-          {/* Stats Dashboard */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-              <div className="flex items-center gap-2 text-blue-600 mb-1">
-                <DollarSign className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wide">Total Spent</span>
+          {/* Stats Dashboard - Mobile Responsive */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border border-blue-200">
+              <div className="flex items-center gap-1 sm:gap-2 text-blue-600 mb-0.5 sm:mb-1">
+                <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wide truncate">Total</span>
               </div>
-              <p className="text-2xl font-bold text-blue-700">₹{stats.total.toLocaleString()}</p>
-              <p className="text-xs text-blue-600 mt-1">Family expenses</p>
+              <p className="text-base sm:text-xl md:text-2xl font-bold text-blue-700 truncate">₹{stats.total.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-xs text-blue-600 mt-0.5 sm:mt-1 truncate">Family</p>
             </div>
             
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-              <div className="flex items-center gap-2 text-green-600 mb-1">
-                <Calendar className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wide">Today</span>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border border-green-200">
+              <div className="flex items-center gap-1 sm:gap-2 text-green-600 mb-0.5 sm:mb-1">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wide truncate">Today</span>
               </div>
-              <p className="text-2xl font-bold text-green-700">₹{stats.todayTotal.toLocaleString()}</p>
-              <p className="text-xs text-green-600 mt-1">Daily spending</p>
+              <p className="text-base sm:text-xl md:text-2xl font-bold text-green-700 truncate">₹{stats.todayTotal.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-xs text-green-600 mt-0.5 sm:mt-1 truncate">Daily</p>
             </div>
             
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
-              <div className="flex items-center gap-2 text-purple-600 mb-1">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wide">Expenses</span>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border border-purple-200">
+              <div className="flex items-center gap-1 sm:gap-2 text-purple-600 mb-0.5 sm:mb-1">
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wide truncate">Count</span>
               </div>
-              <p className="text-2xl font-bold text-purple-700">{stats.count}</p>
-              <p className="text-xs text-purple-600 mt-1">Total entries</p>
+              <p className="text-base sm:text-xl md:text-2xl font-bold text-purple-700">{stats.count}</p>
+              <p className="text-[10px] sm:text-xs text-purple-600 mt-0.5 sm:mt-1 truncate">Entries</p>
             </div>
           </div>
         </div>
 
-        {/* Chat Messages */}
-        <div className="flex-1 bg-white overflow-y-auto p-6 space-y-4">
+        {/* Chat Messages - Mobile Responsive */}
+        <div className="flex-1 bg-white overflow-y-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
           {messages.length > 0 && messages[0].type === 'bot' && (
-            <div className="mb-6">
-              <div className="flex justify-start mb-6">
-                <div className="max-w-2xl rounded-2xl px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
-                  <p className="text-sm leading-relaxed text-gray-700">{messages[0].text}</p>
+            <div className="mb-4 sm:mb-6">
+              <div className="flex justify-start mb-4 sm:mb-6">
+                <div className="max-w-full sm:max-w-2xl rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
+                  <p className="text-xs sm:text-sm leading-relaxed text-gray-700">{messages[0].text}</p>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
-                <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200">
+                <p className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3 flex items-center gap-2">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
                   Quick Actions
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {quickActions.map((qa, idx) => (
                     <button
                       key={idx}
@@ -384,10 +373,10 @@ const ExpenseChatPage: React.FC = () => {
                         setInputText(qa.action);
                         setTimeout(handleSendMessage, 100);
                       }}
-                      className="px-3 py-2 bg-white hover:bg-blue-50 text-left text-gray-700 rounded-lg text-sm font-medium transition-all border border-gray-200 hover:border-blue-300 hover:shadow-sm flex items-center gap-2"
+                      className="px-2 sm:px-3 py-2 bg-white hover:bg-blue-50 text-left text-gray-700 rounded-lg text-xs sm:text-sm font-medium transition-all border border-gray-200 hover:border-blue-300 hover:shadow-sm flex items-center gap-1.5 sm:gap-2"
                     >
-                      <span className="text-lg">{qa.icon}</span>
-                      <span className="flex-1">{qa.text}</span>
+                      <span className="text-base sm:text-lg flex-shrink-0">{qa.icon}</span>
+                      <span className="flex-1 truncate">{qa.text}</span>
                     </button>
                   ))}
                 </div>
@@ -401,7 +390,7 @@ const ExpenseChatPage: React.FC = () => {
               className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-md rounded-2xl px-4 py-3 ${
+                className={`max-w-[85%] sm:max-w-md rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 ${
                   msg.type === 'user'
                     ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg'
                     : msg.type === 'error'
@@ -409,10 +398,10 @@ const ExpenseChatPage: React.FC = () => {
                     : 'bg-gray-100 text-gray-800 border border-gray-200'
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
                 
                 {msg.expense && (
-                  <div className="mt-3 pt-3 border-t border-white/20">
+                  <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/20">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="opacity-80">Amount:</span>
@@ -427,31 +416,31 @@ const ExpenseChatPage: React.FC = () => {
                 )}
 
                 {msg.parsedData && (
-                  <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-xs opacity-70">
+                  <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-xs opacity-70">
                     {msg.parsedData.confidence && (
                       <span>Confidence: {Math.round(msg.parsedData.confidence * 100)}%</span>
                     )}
                     {msg.parsedData.parser && (
-                      <span className="uppercase text-[10px]">{msg.parsedData.parser}</span>
+                      <span className="uppercase text-[9px] sm:text-[10px]">{msg.parsedData.parser}</span>
                     )}
                   </div>
                 )}
 
                 {msg.context?.recentExpenses && msg.context.recentExpenses.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-300">
-                    <p className="text-xs font-semibold mb-2 text-gray-600">Recent Expenses:</p>
+                  <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-300">
+                    <p className="text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2 text-gray-600">Recent Expenses:</p>
                     <div className="space-y-1">
                       {msg.context.recentExpenses.map((exp: any, idx: number) => (
-                        <div key={idx} className="text-xs flex justify-between items-center bg-white/50 px-2 py-1 rounded">
+                        <div key={idx} className="text-[10px] sm:text-xs flex justify-between items-center bg-white/50 px-2 py-1 rounded">
                           <span className="truncate flex-1">{exp.description}</span>
-                          <span className="font-semibold ml-2">₹{exp.amount}</span>
+                          <span className="font-semibold ml-2 whitespace-nowrap">₹{exp.amount}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <p className="text-xs opacity-60 mt-2">
+                <p className="text-[10px] sm:text-xs opacity-60 mt-1 sm:mt-2">
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -460,9 +449,9 @@ const ExpenseChatPage: React.FC = () => {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-2xl px-4 py-3 flex items-center gap-2 border border-gray-200">
-                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                <span className="text-sm text-gray-600">Processing your message...</span>
+              <div className="bg-gray-100 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 border border-gray-200">
+                <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin text-blue-600" />
+                <span className="text-xs sm:text-sm text-gray-600">Processing...</span>
               </div>
             </div>
           )}
@@ -470,37 +459,37 @@ const ExpenseChatPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="bg-white rounded-b-2xl shadow-lg p-4 border-t">
-          <div className="flex gap-2">
+        {/* Input Area - Mobile Responsive */}
+        <div className="bg-white rounded-b-xl sm:rounded-b-2xl shadow-lg p-2 sm:p-3 md:p-4 border-t">
+          <div className="flex gap-1.5 sm:gap-2">
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type in any language: '500 for food' or 'खाने के लिए 500' or 'ഭക്ഷണത്തിന് 500'"
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              placeholder="Type: '500 for food' or 'खाने के लिए 500'"
+              className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm min-w-0"
               disabled={isLoading}
             />
             <button
               onClick={handleSendMessage}
               disabled={isLoading || !inputText.trim()}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl"
+              className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl flex-shrink-0"
             >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </button>
           </div>
           
-          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+          <div className="mt-1.5 sm:mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-[10px] sm:text-xs text-gray-500">
             <p className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              Multilingual AI • English, Hindi, Malayalam, Tamil, Telugu, Kannada
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></span>
+              <span className="truncate">Multilingual AI • 6 Languages</span>
             </p>
-            <p className="opacity-60">Press Enter to send</p>
+            <p className="opacity-60 hidden sm:block">Press Enter to send</p>
           </div>
         </div>
       </div>
