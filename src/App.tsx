@@ -73,6 +73,22 @@ function App() {
             </PublicRoute>
           }
         />
+<Route
+    path="/forgot-password"
+    element={
+      <PublicRoute>
+        <ForgotPasswordPage />
+      </PublicRoute>
+    }
+  />
+  <Route
+    path="/reset-password/:token"
+    element={
+      <PublicRoute>
+        <ResetPasswordPage />
+      </PublicRoute>
+    }
+  />
 
         {/* Protected Routes with Layout */}
         <Route
@@ -90,8 +106,6 @@ function App() {
           <Route path="family" element={<FamilyPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="chat" element ={<ExpenseChatPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         </Route>
 
         {/* Catch all - redirect to login or dashboard */}
